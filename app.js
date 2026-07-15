@@ -9,16 +9,63 @@ app.get('/books', (req, res) => {
 });
 
 app.get('/books/:id', (req, res) => {
-    let book = books.find(p => p.id == req.params.id);
+    let book = books.find(b => b.id == req.params.id);
     if (!book) {
-        return res.status(404).send("The book is not found");
+        res.status(404).send("The book is not found");
     }
-    res.send(book);
+    else {
+        res.send(book);
+    }
 });
 
 app.post('/books', (req, res) => {
     books.push(req.body);
     res.send(books);
+});
+
+app.put('/books/:id', (req, res) => {
+    const index = books.findIndex(b => b.id == req.params.id);
+    if (index === -1) {
+        res.status(404).send("The book is not found");
+    }
+    else {
+        books[index] = req.body;
+        res.send(books[index]);
+    }
+});
+
+app.patch('/books/:id/borrow', (req, res) => {
+    const index = books.findIndex(b => b.id == req.params.id);
+    if (index === -1 || books[index].isBorrowed) {
+        res.status(404).send("The book is not available");
+    }
+    else {
+        books[index].isBorrowed = true;
+        books[index].borrowing.push({ borrowingDate: new Date().toString(), customerId: req.body.customerId });
+        res.send(books[index]);
+    }
+});
+
+app.patch('/books/:id/return', (req, res) => {
+    const index = books.findIndex(b => b.id == req.params.id);
+    if (index === -1) {
+        res.status(404).send("The book is not found");
+    }
+    else {
+        books[index].isBorrowed = false;
+        res.send(books[index]);
+    }
+});
+
+app.delete('/books/:id', (req, res)=>{
+    const index = books.findIndex(b => b.id == req.params.id);
+    if (index === -1) {
+        res.status(404).send("The book is not found");
+    }
+    else{
+        books.splice(index, 1);
+        res.status(204).send();
+    }
 });
 
 app.listen(5000, () => {
