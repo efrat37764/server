@@ -1,27 +1,10 @@
 import { Router } from "express";
-import { users } from "../users.js";
+import { sign_up, sign_in, getAllUsers } from "../controllers/user.controller.js";
 
 const router = Router();
 
-router.post('/', (req, res) => {
-    users.push(req.body);
-    res.json(req.body);
-});
-
-router.post('/sign-in', (req, res) => {
-    const { email, password } = req.body;
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (!user) {
-        res.status(401).send("Invalid email or password");
-    }
-    else {
-        res.json(user.id);
-    }
-});
-
-router.get('/', (req, res) => {
-    res.json(users);
-})
+router.post('/', sign_up);
+router.post('/sign-in', sign_in);
+router.get('/', getAllUsers);
 
 export default router;
