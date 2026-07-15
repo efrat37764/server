@@ -5,7 +5,17 @@ const app = express();
 app.use(express.json());
 
 app.get('/books', (req, res) => {
-    res.send(books);
+    let result = [...books];
+
+    const page = +req.query.page || 1;
+    const limit = +req.query.limit || 10;
+
+    if (req.query.title) {
+        result = result.filter(b => b.title.includes(req.query.title));
+    }
+
+    result = result.slice(((page - 1) * limit), (page * limit));
+    res.send(result);
 });
 
 app.get('/books/:id', (req, res) => {
@@ -57,12 +67,12 @@ app.patch('/books/:id/return', (req, res) => {
     }
 });
 
-app.delete('/books/:id', (req, res)=>{
+app.delete('/books/:id', (req, res) => {
     const index = books.findIndex(b => b.id == req.params.id);
     if (index === -1) {
         res.status(404).send("The book is not found");
     }
-    else{
+    else {
         books.splice(index, 1);
         res.status(204).send();
     }
