@@ -1,28 +1,26 @@
 import express from 'express'
-import {books} from './db.js';
+import { books } from './db.js';
 
 const app = express();
 app.use(express.json());
 
-app.get('/books', (req,res)=>{
-    res.json(books);
+app.get('/books', (req, res) => {
+    res.send(books);
 });
 
-app.get('/books/:id', (req,res)=>{
-    let book = books.find(p=>p.id === parseInt(req.params.id));
-    if (!book){
-        res.status(404);
-        res.send("The book is not found");
-        return;
+app.get('/books/:id', (req, res) => {
+    let book = books.find(p => p.id == req.params.id);
+    if (!book) {
+        return res.status(404).send("The book is not found");
     }
-    res.json(book);
+    res.send(book);
 });
 
-app.post('/books', (req,res)=>{
+app.post('/books', (req, res) => {
     books.push(req.body);
-    res.json(books);
+    res.send(books);
 });
 
 app.listen(5000, () => {
-  console.log('Server is running on http://localhost:5000')
+    console.log('Server is running on http://localhost:5000')
 });
