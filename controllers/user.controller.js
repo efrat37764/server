@@ -11,11 +11,9 @@ export const sign_in = (req, res, next) => {
     const user = users.find(u => u.email === email && u.password === password);
 
     if (!user) {
-        res.status(401).send("Invalid email or password");
+        return next({ status: 401, error: new Error("Invalid email or password"), type: 'authentication error' });
     }
-    else {
-        res.json(user.id);
-    }
+    res.json(user.id);
 };
 
 export const getAllUsers = (req, res, next) => {

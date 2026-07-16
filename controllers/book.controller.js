@@ -17,13 +17,11 @@ export const getAllBooks = (req, res, next) => {
 };
 
 export const getBook = (req, res, next) => {
-    let book = books.find(b => b.id == req.params.id);
+    const book = books.find(b => b.id == req.params.id);
     if (!book) {
-        res.status(404).send("The book is not found");
+        return next({ status: 404, error: new Error('The book is not found'), type: 'resource not found error' });
     }
-    else {
-        res.json(book);
-    }
+    res.json(book);
 };
 
 export const addBook = (req, res, next) => {
@@ -34,12 +32,10 @@ export const addBook = (req, res, next) => {
 export const updateBook = (req, res, next) => {
     const index = books.findIndex(b => b.id == req.params.id);
     if (index === -1) {
-        res.status(404).send("The book is not found");
+        return next({ status: 404, error: new Error("The book is not found"), type: 'resource not found error' });
     }
-    else {
-        books[index] = req.body;
-        res.json(books[index]);
-    }
+    books[index] = req.body;
+    res.json(books[index]);
 };
 
 export const borrowBook = (req, res, next) => {
@@ -47,16 +43,14 @@ export const borrowBook = (req, res, next) => {
     const user = users.find(u => u.id == req.body.customerId);
 
     if (bookIndex === -1 || books[bookIndex].isBorrowed || !user) {
-        res.status(404).send("book not available or user not found");
+        return next({ status: 404, error: new Error("book not available or user not found"), type: 'resource not found error' });
     }
-    else {
-        books[bookIndex].isBorrowed = true;
-        books[bookIndex].borrowing.push({ borrowingDate: new Date().toString(), customerId: req.body.customerId });
+    books[bookIndex].isBorrowed = true;
+    books[bookIndex].borrowing.push({ borrowingDate: new Date().toString(), customerId: req.body.customerId });
 
-        user.borrowedBooks.push(books[bookIndex].id);
+    user.borrowedBooks.push(books[bookIndex].id);
 
-        res.json(books[bookIndex]);
-    }
+    res.json(books[bookIndex]);
 };
 
 export const returnBook = (req, res, next) => {
@@ -64,23 +58,19 @@ export const returnBook = (req, res, next) => {
     const user = users.find(u => u.id == req.body.customerId);
 
     if (bookIndex === -1 || !user) {
-        return res.status(404).send("Book or user not found");
+        return next({ status: 404, error: new Error("Book or user not found"), type: 'resource not found error' });
     }
-    else {
-        books[bookIndex].isBorrowed = false;
-        user.borrowedBooks = user.borrowedBooks.filter(id => id != req.params.id);
+    books[bookIndex].isBorrowed = false;
+    user.borrowedBooks = user.borrowedBooks.filter(id => id != req.params.id);
 
-        res.json(books[bookIndex]);
-    }
+    res.json(books[bookIndex]);
 };
 
 export const deleteBook = (req, res, next) => {
     const index = books.findIndex(b => b.id == req.params.id);
     if (index === -1) {
-        res.status(404).send("The book is not found");
+        return next({ status: 404, error: new Error("The book is not found"), type: 'resource not found error' });
     }
-    else {
-        books.splice(index, 1);
-        res.status(204).send();
-    }
+    books.splice(index, 1);
+    res.status(204).send();
 };
