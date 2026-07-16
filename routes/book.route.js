@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { getAllBooks, getBook, addBook, updateBook, borrowBook, returnBook, deleteBook } from '../controllers/book.controller.js';
-import { logGetRequest } from '../middlewares/index.middleware.js';
+import { logGetRequests } from '../middlewares/index.middleware.js';
 
 const router = Router();
 
-router.get('/', logGetRequest, getAllBooks);
-router.get('/:id', logGetRequest, getBook);
+router.get('/', logGetRequests, getAllBooks);
+router.get('/:id', logGetRequests, getBook);
 router.post('/', addBook);
 router.put('/:id', updateBook);
 router.patch('/:id/borrow', borrowBook);
