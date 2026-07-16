@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>בדיקת שרת</title>
+</head>
+
+<body dir="rtl">
+    <h1>בדיקת חיבור לשרת</h1>
+    <ul id="booksList"></ul>
+
+    <script>
+        async function fetchBooks() {
+            try {
+                const response = await fetch('http://localhost:5000/api/books');
+                const data = await response.json();
+
+                const listElement = document.getElementById('booksList');
+
+                if (Array.isArray(data)) {
+                    let htmlContent = '';
+                    for (let i = 0; i < data.length; i++) {
+                        htmlContent += `<li>${data[i].title}</li>`;
+                    }
+                    listElement.innerHTML = htmlContent;
+                }
+                else {
+                    console.log(error);
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+        fetchBooks();
+    </script>
+
+</body>
+
+</html>
