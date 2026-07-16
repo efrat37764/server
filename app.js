@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import helmet from "helmet";
 import rateLimit from 'express-rate-limit';
 import indexRoutes from './routes/index.route.js';
+import { addRequestDate } from './middlewares/index.middleware.js';
 
 const app = express();
 
@@ -18,6 +19,8 @@ app.use(morgan('dev'));
 app.use(rateLimit({windowMs: 15 * 60 * 1000, max: 100, message: 'Too many requests from this IP, please try again after 15 minutes',}));
 
 app.use(express.json());
+
+app.use(addRequestDate);
 
 app.use('/api', indexRoutes);
 
