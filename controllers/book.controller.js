@@ -1,76 +1,123 @@
-import { books } from '../db.js';
-import { users } from '../users.js';
+import { Book } from '../models/book.model.js';
 
 
-export const getAllBooks = (req, res, next) => {
-    let result = [...books];
+export const getAllBooks = async (req, res, next) => {
+    try {
+        const page = +req.query.page || 1;
+        const limit = +req.query.limit || 10;
+        const filter = {};
 
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 10;
+        if (req.query.title) {
+            filter.name = { $regex: req.query.title, $options: 'i' };
+        }
 
-    if (req.query.title) {
-        result = result.filter(b => b.title.includes(req.query.title));
+        const books = await Book.find(filter).skip((page - 1) * limit).limit(limit);
+
+        res.json(books);
     }
-
-    result = result.slice(((page - 1) * limit), (page * limit));
-    res.json(result);
+    catch (error) {
+        next({ status: 500, error: new Error('Server Error'), type: 'server error' });
+    }
 };
 
-export const getBook = (req, res, next) => {
-    const book = books.find(b => b.id == req.params.id);
-    if (!book) {
-        return next({ status: 404, error: new Error('The book is not found'), type: 'resource not found error' });
+export const getBook = async (req, res, next) => {
+    try {
+        const book = await Book.findById(req.params.id);
+
+        if (!book) {
+            return next({ status: 404, error: new Error('The book is not found'), type: 'resource not found error' });
+        }
+
+        res.json(book);
     }
-    res.json(book);
+    catch (error) {
+        next({ status: 500, error: new Error('Server Error'), type: 'server error' });
+    }
 };
 
-export const addBook = (req, res, next) => {
-    books.push(req.body);
-    res.json(books);
+export const addBook = async (req, res, next) => {
+    try {
+        const newBook = new Book(req.body);
+        await newBook.save();
+
+        res.json(newBook);
+    }
+    catch (error) {
+        next({ status: 500, error: new Error('Server Error'), type: 'server error' });
+    }
 };
 
-export const updateBook = (req, res, next) => {
-    const index = books.findIndex(b => b.id == req.params.id);
-    if (index === -1) {
-        return next({ status: 404, error: new Error("The book is not found"), type: 'resource not found error' });
+export const updateBook = async (req, res, next) => {
+    try {
+        const b = await Book.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+
+        if (!b) {
+            return next({ status: 404, error: new Error('The book is not found'), type: 'resource not found error' });
+        }
+
+        res.json(b);
     }
-    books[index] = req.body;
-    res.json(books[index]);
+    catch (error) {
+        next({ status: 500, error: new Error('Server Error'), type: 'server error' });
+    }
 };
 
-export const borrowBook = (req, res, next) => {
-    const bookIndex = books.findIndex(b => b.id == req.params.id);
-    const user = users.find(u => u.id == req.body.customerId);
+export const borrowBook = async (req, res, next) => {
+    try {
+        const book = await Book.findById(req.params.id);
 
-    if (bookIndex === -1 || books[bookIndex].isBorrowed || !user) {
-        return next({ status: 404, error: new Error("book not available or user not found"), type: 'resource not found error' });
+        if (!book) {
+            return next({ status: 404, error: new Error('The book is not found'), type: 'resource not found error' });
+        }
+
+        if (book.isBorrowed) {
+            return next({ status: 400, error: new Error('Book already borrowed'), type: 'bad request' });
+        }
+
+        book.isBorrowed = true;
+        book.borrowing.push({ borrowingDate: new Date().toString(), customerId: req.body.customerId });
+        // user.borrowedBooks.push(books[bookIndex].id);
+
+        await book.save();
+
+        res.json(book);
     }
-    books[bookIndex].isBorrowed = true;
-    books[bookIndex].borrowing.push({ borrowingDate: new Date().toString(), customerId: req.body.customerId });
-
-    user.borrowedBooks.push(books[bookIndex].id);
-
-    res.json(books[bookIndex]);
+    catch (error) {
+        next({ status: 500, error: new Error('Server Error'), type: 'server error' });
+    }
 };
 
-export const returnBook = (req, res, next) => {
-    const bookIndex = books.findIndex(b => b.id == req.params.id);
-    const user = users.find(u => u.id == req.body.customerId);
+export const returnBook = async (req, res, next) => {
+    try {
+        const book = await Book.findById(req.params.id);
 
-    if (bookIndex === -1 || !user) {
-        return next({ status: 404, error: new Error("Book or user not found"), type: 'resource not found error' });
+        if (!book) {
+            return next({ status: 404, error: new Error('The book is not found'), type: 'resource not found error' });
+        }
+
+        book.isBorrowed = false;
+        // user.borrowedBooks = user.borrowedBooks.filter(id => id != req.params.id);
+        // const user = users.find(u => u.id == req.body.customerId);
+        await book.save();
+
+        res.json(book);
     }
-    books[bookIndex].isBorrowed = false;
-    user.borrowedBooks = user.borrowedBooks.filter(id => id != req.params.id);
-
-    res.json(books[bookIndex]);
+    catch (error) {
+        next({ status: 500, error: new Error('Server Error'), type: 'server error' });
+    }
 };
 
-export const deleteBook = (req, res, next) => {
-    const index = books.findIndex(b => b.id == req.params.id);
-    if (index === -1) {
-        return next({ status: 404, error: new Error("The book is not found"), type: 'resource not found error' });
+export const deleteBook = async (req, res, next) => {
+    try {
+        const b = await Book.findByIdAndDelete(req.params.id);
+
+        if (!b) {
+            return next({ status: 404, error: new Error('The book is not found'), type: 'resource not found error' });
+        }
+
+        res.status(204).send();
     }
-    books.splice(index, 1);
-    res.status(204).send();
+    catch (error) {
+        next({ status: 500, error: new Error('Server Error'), type: 'server error' });
+    }
 };
