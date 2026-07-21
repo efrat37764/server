@@ -6,8 +6,11 @@ import rateLimit from 'express-rate-limit';
 import indexRoutes from './routes/index.route.js';
 import { addRequestDate } from './middlewares/index.middleware.js';
 import { notFound, errorHandler } from './middlewares/errors.middleware.js';
+import { connectDB } from './config/db.js';
 
 const app = express();
+
+connectDB();
 
 // הוספת כותרות אבטחה להגנה מפני פגיעויות נפוצות ברשת
 app.use(helmet());

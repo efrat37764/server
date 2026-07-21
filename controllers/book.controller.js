@@ -40,7 +40,7 @@ export const addBook = async (req, res, next) => {
         const newBook = new Book(req.body);
         await newBook.save();
 
-        res.json(newBook);
+        res.json(newBook);        
     }
     catch (error) {
         next({ status: 500, error: new Error('Server Error'), type: 'server error' });

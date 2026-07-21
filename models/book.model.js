@@ -1,10 +1,10 @@
 import { model, Schema } from "mongoose";
 
 const bookSchema = new Schema({
-    name: String,
+    title: String,
     price: Number,
     category: [String],
-    auther: {
+    author: {
         name: String,
         phone: Number,
         email: String,

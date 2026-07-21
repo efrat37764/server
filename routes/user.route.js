@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { sign_up, sign_in, getAllUsers } from "../controllers/user.controller.js";
-import { logGetRequests, validate } from '../middlewares/index.middleware.js';
-import { userSchema, loginSchema } from '../schemas/joiSchemas.js';
+import { logGetRequests } from '../middlewares/index.middleware.js';
+import { validate } from "../middlewares/validate.middleware.js";
+import { userSchema, loginSchema } from '../schemas/books&users.scema.js';
 
 
 const router = Router();

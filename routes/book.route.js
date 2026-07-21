@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { getAllBooks, getBook, addBook, updateBook, borrowBook, returnBook, deleteBook } from '../controllers/book.controller.js';
-import { logGetRequests, validate } from '../middlewares/index.middleware.js';
-import { bookSchema } from '../schemas/joiSchemas.js';
+import { logGetRequests } from '../middlewares/index.middleware.js';
+import { validate } from "../middlewares/validate.middleware.js";
+import { bookSchema } from '../schemas/books&users.scema.js';
 
 const router = Router();
 
