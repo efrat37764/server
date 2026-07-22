@@ -6,7 +6,7 @@ const bookSchema = new Schema({
     category: [String],
     author: {
         name: String,
-        phone: Number,
+        phone: String,
         email: String,
     },
 });

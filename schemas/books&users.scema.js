@@ -15,7 +15,11 @@ export const userSchema = Joi.object({
 
 export const bookSchema = Joi.object({
     title: Joi.string().trim().min(2).max(100).required(),
-    author: Joi.string().trim().min(2).max(50).required(),
+    author: Joi.object({
+        name: Joi.string().trim().min(2).max(50).required(),
+        phone: Joi.string().trim().optional(),
+        email: Joi.string().email().optional()
+    }).required(),
     price: Joi.number().positive().precision(2).required()
 });
 
