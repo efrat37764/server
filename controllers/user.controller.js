@@ -1,21 +1,40 @@
-import { users } from "../users.js";
+import { User } from '../models/user.model.js';
 
 
-export const sign_up = (req, res, next) => {
-    users.push(req.body);
-    res.json(req.body);
-};
+export const sign_up = async (req, res, next) => {
+    try {
+        const newUser = new User(req.body);
+        await newUser.save();
 
-export const sign_in = (req, res, next) => {
-    const { email, password } = req.body;
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (!user) {
-        return next({ status: 401, error: new Error("Invalid email or password"), type: 'authentication error' });
+        res.json(newUser);
     }
-    res.json(user.id);
+    catch (error) {
+        next({ status: 500, error: new Error('Server Error'), type: 'server error' });
+    }
 };
 
-export const getAllUsers = (req, res, next) => {
-    res.json(users);
+export const sign_in = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email, password });
+
+        if (!user) {
+            return next({ status: 401, error: new Error("Invalid email or password"), type: 'authentication error' });
+        }
+
+        res.json(user._id);
+    }
+    catch (error) {
+        next({ status: 500, error: new Error('Server Error'), type: 'server error' });
+    }
+};
+
+export const getAllUsers = async (req, res, next) => {
+    try {
+        const users = await User.find();
+        res.json(users);
+    }
+    catch (error) {
+        next({ status: 500, error: new Error('Server Error'), type: 'server error' });
+    }
 };
