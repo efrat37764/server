@@ -7,6 +7,7 @@ import indexRoutes from './routes/index.route.js';
 import { addRequestDate } from './middlewares/index.middleware.js';
 import { notFound, errorHandler } from './middlewares/errors.middleware.js';
 import { connectDB } from './config/db.js';
+import { env } from './config/env.js';
 
 const app = express();
 
@@ -31,6 +32,6 @@ app.use('/api', indexRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(5000, () => {
-    console.log('Server is running on http://localhost:5000')
+app.listen(env.PORT, () => {
+    console.log(`Server is running on http://localhost:${env.PORT}`)
 });

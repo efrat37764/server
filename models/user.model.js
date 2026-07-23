@@ -1,5 +1,7 @@
 import { model, Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import { env } from '../config/env.js';
+
 
 const userSchema = new Schema({
     name: String,
@@ -32,7 +34,7 @@ userSchema.pre('save', async function () {
         return;
     }
     
-    this.password = await bcrypt.hash(this.password, 12);
+    this.password = await bcrypt.hash(this.password, env.BCRYPT_ROUNDS);
 });
 
 
