@@ -1,4 +1,5 @@
 import { Book } from '../models/book.model.js';
+import { User } from '../models/user.model.js';
 
 
 export const getAllBooks = async (req, res, next) => {
@@ -8,7 +9,7 @@ export const getAllBooks = async (req, res, next) => {
         const filter = {};
 
         if (req.query.title) {
-            filter.name = { $regex: req.query.title, $options: 'i' };
+            filter.title = { $regex: req.query.title, $options: 'i' };
         }
 
         const books = await Book.find(filter).skip((page - 1) * limit).limit(limit);
@@ -35,12 +36,24 @@ export const getBook = async (req, res, next) => {
     }
 };
 
+export const getBooksByCategory = async (req, res, next) => {
+    try {
+        const { categoryName } = req.params;
+        const books = await Book.find({ category: categoryName });
+
+        res.json(books);
+    }
+    catch (error) {
+        next({ status: 500, error: new Error('Server Error'), type: 'server error' });
+    }
+};
+
 export const addBook = async (req, res, next) => {
     try {
         const newBook = new Book(req.body);
         await newBook.save();
 
-        res.json(newBook);        
+        res.json(newBook);
     }
     catch (error) {
         next({ status: 500, error: new Error('Server Error'), type: 'server error' });
@@ -49,13 +62,13 @@ export const addBook = async (req, res, next) => {
 
 export const updateBook = async (req, res, next) => {
     try {
-        const b = await Book.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+        const book = await Book.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
 
-        if (!b) {
+        if (!book) {
             return next({ status: 404, error: new Error('The book is not found'), type: 'resource not found error' });
         }
 
-        res.json(b);
+        res.json(book);
     }
     catch (error) {
         next({ status: 500, error: new Error('Server Error'), type: 'server error' });
@@ -74,11 +87,17 @@ export const borrowBook = async (req, res, next) => {
             return next({ status: 400, error: new Error('Book already borrowed'), type: 'bad request' });
         }
 
+        const user = await User.findById(req.body.userId);
+
+        if (!user) {
+            return next({ status: 404, error: new Error('The user is not found'), type: 'resource not found error' });
+        }
+
         book.isBorrowed = true;
-        book.borrowing.push({ borrowingDate: new Date().toString(), customerId: req.body.customerId });
-        // user.borrowedBooks.push(books[bookIndex].id);
+        user.borrowedBooks.push({ code: book._id.toString(), bookName: book.title });
 
         await book.save();
+        await user.save();
 
         res.json(book);
     }
@@ -95,9 +114,16 @@ export const returnBook = async (req, res, next) => {
             return next({ status: 404, error: new Error('The book is not found'), type: 'resource not found error' });
         }
 
+        const user = await User.findOne({ "borrowedBooks.code": req.params.id });
+
+        if (user) {
+            user.borrowedBooks = user.borrowedBooks.filter(b => b.code !== req.params.id);
+
+            await user.save();
+        }
+
         book.isBorrowed = false;
-        // user.borrowedBooks = user.borrowedBooks.filter(id => id != req.params.id);
-        // const user = users.find(u => u.id == req.body.customerId);
+
         await book.save();
 
         res.json(book);
@@ -109,9 +135,9 @@ export const returnBook = async (req, res, next) => {
 
 export const deleteBook = async (req, res, next) => {
     try {
-        const b = await Book.findByIdAndDelete(req.params.id);
+        const book = await Book.findByIdAndDelete(req.params.id);
 
-        if (!b) {
+        if (!book) {
             return next({ status: 404, error: new Error('The book is not found'), type: 'resource not found error' });
         }
 

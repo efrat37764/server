@@ -17,6 +17,11 @@ const bookSchema = new Schema({
         phone: String,
         email: String,
     },
+    // isBorrowed -יש סתירה בין תיאור הפונקציות (השאלה, והחזרה) לבין סכמת הספר, לכן הוספתי את השדה 
+    isBorrowed: {
+        type: Boolean,
+        default: false
+    }
 });
 
 
