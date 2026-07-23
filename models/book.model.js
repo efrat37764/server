@@ -10,7 +10,7 @@ const bookSchema = new Schema({
     price: Number,
     category: {
         type: [String],
-        enum: ['Adults', 'youth', 'Children', 'Science', 'History', 'Comics']
+        enum: ['Adults', 'Youth', 'Children', 'Science', 'History', 'Comics']
     },
     author: {
         name: String,

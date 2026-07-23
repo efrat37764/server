@@ -2,19 +2,22 @@ import Joi from 'joi';
 
 
 export const userSchema = Joi.object({
-    username: Joi.string().trim().min(3).max(30).required(),
+    name: Joi.string().trim().min(3).max(30).required(),
     email: Joi.string().trim().email().required(),
+    phone: Joi.string().pattern(/^0[2-9]\d{7}$|^05[0-9]\d{7}$/).required(),
     password: Joi.string().min(8).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/).required()
         .messages({
             'string.pattern.base': 'Password must contain uppercase, lowercase, number and special character',
             'string.min': 'Password must be at least 8 characters long'
         }),
-    borrowedBooks: Joi.array().items(Joi.number().integer().positive()).default([])
+    borrowedBooks:  Joi.array().default([])
 });
 
 
 export const bookSchema = Joi.object({
     title: Joi.string().trim().min(2).max(100).required(),
+    price: Joi.number().positive().precision(2).required(),
+    category: Joi.array().items(Joi.string().valid('Adults','Youth','Children','Science','History','Comics')).required(),
     author: Joi.object({
         name: Joi.string().trim().min(2).max(50).required(),
         phone: Joi.string().trim().optional(),
