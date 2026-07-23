@@ -23,7 +23,6 @@ export const bookSchema = Joi.object({
         phone: Joi.string().trim().optional(),
         email: Joi.string().email().optional()
     }).required(),
-    price: Joi.number().positive().precision(2).required()
 });
 
 
