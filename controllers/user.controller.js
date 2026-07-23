@@ -16,13 +16,19 @@ export const sign_up = async (req, res, next) => {
 export const sign_in = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email, password });
+        const user = await User.findOne({ email });
 
         if (!user) {
             return next({ status: 401, error: new Error("Invalid email or password"), type: 'authentication error' });
         }
 
-        res.json(user._id);
+        const isCorrect = await User.checkPassword(password, user.password);
+
+        if (!isCorrect) {
+            return next({ status: 401, error: new Error("Invalid email or password"), type: "authentication error" });
+        }
+
+        res.json(user);
     }
     catch (error) {
         next({ status: 500, error: new Error('Server Error'), type: 'server error' });

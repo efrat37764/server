@@ -1,4 +1,5 @@
 import { model, Schema } from "mongoose";
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema({
     name: String,
@@ -23,6 +24,34 @@ const userSchema = new Schema({
         code: String,
         bookName: String,
     }],
+});
+
+
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) {
+        return;
+    }
+    
+    this.password = await bcrypt.hash(this.password, 12);
+});
+
+
+userSchema.statics.checkPassword = async function (password, hashedPassword) {
+    return bcrypt.compare(password, hashedPassword);
+};
+
+
+userSchema.set('toJSON', {
+    transform: (doc, ret) => {
+
+        delete ret.password;
+        delete ret.__v;
+
+        ret.id = ret._id;
+        delete ret._id;
+
+        return ret;
+    }
 });
 
 
